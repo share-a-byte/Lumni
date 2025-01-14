@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* React Slick CSS */
 
 :root {
   --background: #ffffff;
