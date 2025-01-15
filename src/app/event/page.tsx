@@ -1,14 +1,36 @@
 "use client";
 
 import { Tab } from "@headlessui/react";
-import {
-  UsersIcon,
-  MapPinIcon,
-  CalendarIcon,
-  ClockIcon,
-} from "@heroicons/react/24/outline";
+import { BiCalendarEvent } from "react-icons/bi";
+import { CiMapPin } from "react-icons/ci";
+import { FaRegClock } from "react-icons/fa";
+import { HiOutlineUser } from "react-icons/hi";
+import { useEffect, useState } from "react";
+import { createClient } from "@/utils/supabase/client";
+import Link from "next/link";
 
 export default function Event() {
+  const [attendees, setAttendees] = useState<Attendee[]>([]);
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function fetchAttendees() {
+      try {
+        const { data, error } = await supabase.from("attendees").select("*");
+
+        if (error) throw error;
+
+        console.log(data);
+
+        setAttendees(data || []);
+      } catch (error) {
+        console.error("Error fetching attendees:", error);
+      }
+    }
+
+    fetchAttendees();
+  }, [supabase]);
+
   const eventDetails = {
     name: "Women in Trading & Technology",
     date: "January 13-15, 2025",
@@ -59,23 +81,6 @@ export default function Event() {
     ],
   };
 
-  const attendees = [
-    {
-      name: "Sarah Chen",
-      role: "Product Designer",
-      company: "Designworks",
-      avatar:
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-    },
-    {
-      name: "Alex Kim",
-      role: "UX Researcher",
-      company: "TechCorp",
-      avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
       {/* Event Header */}
@@ -86,15 +91,15 @@ export default function Event() {
           <h1 className="text-5xl font-bold mb-4">{eventDetails.name}</h1>
           <div className="flex flex-wrap justify-center gap-4 text-gray-200">
             <div className="flex items-center">
-              <CalendarIcon className="h-5 w-5 mr-2" />
+              <BiCalendarEvent className="h-5 w-5 mr-2" />
               {eventDetails.date}
             </div>
             <div className="flex items-center">
-              <MapPinIcon className="h-5 w-5 mr-2" />
+              <CiMapPin className="h-5 w-5 mr-2" />
               {eventDetails.location}
             </div>
             <div className="flex items-center">
-              <UsersIcon className="h-5 w-5 mr-2" />
+              <HiOutlineUser className="h-5 w-5 mr-2" />
               {eventDetails.attendeeCount} Attendees
             </div>
           </div>
@@ -166,7 +171,7 @@ export default function Event() {
                     className="flex items-center justify-between bg-gray-800 p-4 rounded-lg mb-2"
                   >
                     <div className="flex items-center">
-                      <ClockIcon className="h-5 w-5 text-indigo-400 mr-2" />
+                      <FaRegClock className="h-5 w-5 text-indigo-400 mr-2" />
                       <span>{item.time}</span>
                     </div>
                     <span>{item.title}</span>
@@ -179,24 +184,18 @@ export default function Event() {
       </div>
 
       {/* Attendees */}
-      <div className="max-w-7xl mx-auto px-6 mt-12 mb-12">
+      <div className="max-w-7xl mx-auto px-6 mt-12 pb-12">
         <h2 className="text-2xl font-semibold mb-6">Attendees</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {attendees.map((attendee, index) => (
-            <div
-              key={index}
-              className="bg-gray-800 p-4 rounded-lg flex items-center space-x-4"
-            >
-              <img
-                src={attendee.avatar}
-                alt={attendee.name}
-                className="h-12 w-12 rounded-full"
-              />
-              <div>
-                <h3 className="text-lg">{attendee.name}</h3>
-                <p className="text-sm text-gray-400">{attendee.role}</p>
+            <Link key={index} href={`/profile?id=${attendee.id}`}>
+              <div className="hover:scale-105 transition duration-300 ease-in-out bg-gray-800 p-4 rounded-lg flex items-center space-x-4">
+                <div>
+                  <h3 className="text-lg">{attendee.full_name}</h3>
+                  <p className="text-sm text-gray-400">{attendee.university}</p>
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { KeyIcon } from "@heroicons/react/24/outline";
 import { redirect } from "next/navigation";
+import { BiKey } from "react-icons/bi";
 
 export default function Home() {
   const [code, setCode] = useState("");
@@ -23,7 +23,7 @@ export default function Home() {
         {/* Header Section */}
         <div className="text-center">
           <div className="mx-auto h-16 w-16 bg-indigo-200 rounded-full flex items-center justify-center shadow-lg">
-            <KeyIcon className="h-8 w-8 text-indigo-600" />
+            <BiKey className="h-8 w-8 text-indigo-600" />
           </div>
           <h1 className="mt-6 text-2xl font-bold text-gray-900">
             Join your group

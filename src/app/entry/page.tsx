@@ -1,37 +1,59 @@
-// app/profile/page.tsx
 "use client";
 
 import { useState } from "react";
 import Image from "next/image";
-import { FaLinkedin, FaInstagram, FaTwitter, FaGithub } from "react-icons/fa";
+import { FaLinkedin, FaInstagram } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import { createClient } from "@/utils/supabase/client";
+import { LuUniversity } from "react-icons/lu";
 
 export default function ProfilePage() {
   const [loading, setLoading] = useState(false);
+  const [formError, setError] = useState("");
   const [formData, setFormData] = useState({
     fullName: "",
-    username: "",
     bio: "",
     email: "",
     linkedin: "",
     instagram: "",
-    twitter: "",
-    github: "",
+    university: "",
     avatar: null as File | null,
   });
-
-  //   const supabase = await createClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    const supabase = await createClient();
     try {
       // Handle profile update logic here
+      if (!formData.fullName || !formData.university) {
+        setError("Please fill in your name and university");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("attendees")
+        .insert([
+          {
+            full_name: formData.fullName,
+            email: formData.email,
+            linkedin_url: formData.linkedin,
+            instagram: formData.instagram,
+            university: formData.university,
+          },
+        ])
+        .select();
+
+      if (!data || error) {
+        setError("Error updating profile");
+        return;
+      }
+
+      setLoading(false);
+      window.location.href = "/event";
     } catch (error) {
       console.error("Error updating profile:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -94,33 +116,27 @@ export default function ProfilePage() {
             {/* Profile Information Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="col-span-full md:col-span-1">
-                <label
-                  htmlFor="username"
-                  className="block text-sm font-medium text-gray-300"
-                >
-                  Full Name
-                </label>
                 <input
                   type="text"
                   id="username"
-                  className="mt-1 block w-full rounded-lg bg-gray-700/50 border-transparent 
+                  className="required mt-1 block w-full rounded-lg bg-gray-700/50 border-transparent 
                            focus:border-violet-500 focus:ring-2 focus:ring-violet-500 
                            text-white px-4 py-3 transition-colors duration-200"
-                  value={formData.username}
+                  value={formData.fullName}
                   onChange={(e) =>
-                    setFormData({ ...formData, username: e.target.value })
+                    setFormData({ ...formData, fullName: e.target.value })
                   }
                   placeholder="Your Name"
                 />
               </div>
 
               <div className="col-span-full md:col-span-1">
-                <label
+                {/* <label
                   htmlFor="email"
                   className="block text-sm font-medium text-gray-300"
                 >
                   Email
-                </label>
+                </label> */}
                 <div className="mt-1 relative rounded-lg">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <MdEmail className="h-5 w-5 text-gray-400" />
@@ -135,9 +151,27 @@ export default function ProfilePage() {
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
                     }
-                    placeholder="your@email.com"
+                    placeholder="you@email.com"
                   />
                 </div>
+              </div>
+
+              {/* University */}
+              <div className="relative rounded-lg lg:col-span-2">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <LuUniversity className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  className="block w-full pl-10 rounded-lg bg-gray-700/50 border-transparent 
+                               focus:border-violet-500 focus:ring-2 focus:ring-violet-500 
+                               text-white px-4 py-3 transition-colors duration-200"
+                  value={formData.university}
+                  onChange={(e) =>
+                    setFormData({ ...formData, university: e.target.value })
+                  }
+                  placeholder="University"
+                />
               </div>
 
               {/* Social Links */}
@@ -181,52 +215,11 @@ export default function ProfilePage() {
                       placeholder="Instagram"
                     />
                   </div>
-
-                  {/* Twitter */}
-                  {/* <div className="relative rounded-lg">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaTwitter className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="text"
-                      className="block w-full pl-10 rounded-lg bg-gray-700/50 border-transparent 
-                               focus:border-violet-500 focus:ring-2 focus:ring-violet-500 
-                               text-white px-4 py-3 transition-colors duration-200"
-                      value={formData.twitter}
-                      onChange={(e) =>
-                        setFormData({ ...formData, twitter: e.target.value })
-                      }
-                      placeholder="Twitter Username"
-                    />
-                  </div> */}
-
-                  {/* GitHub */}
-                  {/* <div className="relative rounded-lg">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaGithub className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="text"
-                      className="block w-full pl-10 rounded-lg bg-gray-700/50 border-transparent 
-                               focus:border-violet-500 focus:ring-2 focus:ring-violet-500 
-                               text-white px-4 py-3 transition-colors duration-200"
-                      value={formData.github}
-                      onChange={(e) =>
-                        setFormData({ ...formData, github: e.target.value })
-                      }
-                      placeholder="GitHub Username"
-                    />
-                  </div> */}
                 </div>
               </div>
 
               <div className="col-span-full">
-                <label
-                  htmlFor="bio"
-                  className="block text-sm font-medium text-gray-300"
-                >
-                  Bio
-                </label>
+                <h3 className="text-lg font-medium text-gray-200 mb-2">Bio</h3>
                 <textarea
                   id="bio"
                   rows={4}
@@ -237,12 +230,16 @@ export default function ProfilePage() {
                   onChange={(e) =>
                     setFormData({ ...formData, bio: e.target.value })
                   }
-                  placeholder="Quick bio..."
+                  placeholder="Enter a bio if you'd like!"
                 />
               </div>
             </div>
-
-            <div className="mt-8">
+            {formError && (
+              <p className="text-red-500 flex justify-center mt-4">
+                {formError}
+              </p>
+            )}
+            <div className="mt-4">
               <button
                 type="submit"
                 disabled={loading}
